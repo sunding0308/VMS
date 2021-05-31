@@ -5,7 +5,7 @@
 			// baseUrl:'http://192.168.60.160:8080/jtvms'
 			baseUrl:'https://crm.jtgroup.com.cn:8100/jtvms'
 			// baseUrl:'http://192.168.3.34:8888/jtvms'
-			// baseUrl:'http://192.168.3.91:8899/JTVMS'
+			// baseUrl:'http://192.168.3.91:8899/jtvms'
 			// baseUrl:'http://192.168.61.25:8080/jtvms'
 		},
 		onLaunch: function() {

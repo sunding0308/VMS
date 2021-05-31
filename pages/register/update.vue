@@ -136,7 +136,7 @@
 				<button class="cu-btn round bg-gradual-blue" @click="addMoreCar">添加更多车辆</button>
 			</view>
 			
-			<view class="cu-bar bg-white margin-top">
+<!-- 			<view class="cu-bar bg-white margin-top">
 				<view class="action">
 					身份证上传(正面)
 				</view>
@@ -177,7 +177,7 @@
 						<text class='cuIcon-cameraadd'></text>
 					</view>
 				</view>
-			</view>
+			</view> -->
 			<view class="cu-load load-modal" v-if="loadModal">
 				<view class="gray-text">上传中...</view>
 			</view>
@@ -322,8 +322,8 @@
 							} else {
 								this.moreCar = true
 							}
-							this.idcard_positive = res.data.data.IDCARD_POSITIVE
-							this.idcard_back = res.data.data.IDCARD_BACK
+							// this.idcard_positive = res.data.data.IDCARD_POSITIVE
+							// this.idcard_back = res.data.data.IDCARD_BACK
 						} else {
 							console.log(res.data.message);
 						}
@@ -693,20 +693,20 @@
 						return false
 					}
 				}
-				if (this.idcard_positive == '') {
-					uni.showModal({
-						content: '请上传身份证正面照片',
-						showCancel: false
-					})
-					return false
-				}
-				if (this.idcard_back == '') {
-					uni.showModal({
-						content: '请上传身份证背面照片',
-						showCancel: false
-					})
-					return false
-				}
+				// if (this.idcard_positive == '') {
+				// 	uni.showModal({
+				// 		content: '请上传身份证正面照片',
+				// 		showCancel: false
+				// 	})
+				// 	return false
+				// }
+				// if (this.idcard_back == '') {
+				// 	uni.showModal({
+				// 		content: '请上传身份证背面照片',
+				// 		showCancel: false
+				// 	})
+				// 	return false
+				// }
 				return true
 			},
 			register() {

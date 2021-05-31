@@ -109,6 +109,28 @@
 				我的
 			</view>
 		</view>
+<!-- 		<div class="button">
+			<wx-open-subscribe :template="['Al921RVRtQBGM7XQwgJL1ER8lwHVELRj7-HZk6B9i0k']" @error="onError" @success="onSuccess" id="subscribe">
+				<script type="text/wxtag-template">
+					<style>
+						button{
+							padding: 10px 30px;
+							display: flex;
+							width: 100%;
+							align-items: center;
+							justify-content: center;
+							background: #4BCB7C;
+							color: #fff;
+							font-size: 16px;
+							border: none;
+							outline: none;
+							border-radius: 50px;
+						}
+					</style>
+					<button class="cu-btn bg-green lg bottom-space" @click="confirm" v-show="this.businessStatus == 10" :disabled="isLocated">接收入厂通知</button>
+				</script>
+			</wx-open-subscribe>
+		</div> -->
 	</view>
 </template>
 
@@ -129,7 +151,6 @@
 				door:'',
 				clientName:'',
 				goodsWeight:'',
-				type:'',
 				isNeedQueue:'',
 				status:'',
 				reservationInfo:false,
@@ -148,6 +169,21 @@
 			...mapState(['openid'])
 		},
 		methods: {
+			// onError(e) {
+			// 	console.log(e);
+			// },
+			// onSuccess(e) {
+			// 	if (e.detail.errMsg == 'subscribe:ok') {
+			// 		let status = JSON.parse(e.detail.subscribeDetails);
+			// 		if (JSON.parse(status['模板消息ID']).status == 'accept') {
+			// 			Toast.success('订阅成功');
+			// 		} else {
+			// 			Toast.fail('订阅失败');
+			// 		}
+			// 	} else {
+			// 		Toast.fail('订阅失败');
+			// 	}
+			// },
 			onShow(){
 			    this.getReservation()
 			},
@@ -276,7 +312,6 @@
 										this.door = ''
 										this.clientName = ''
 										this.goodsWeight = ''
-										this.type = ''
 										this.reservationInfo = false
 										this.reservationNo = ''
 										this.userid = ''
@@ -389,7 +424,6 @@
 							this.door = res.data.data.ENTER_GATE
 							this.clientName = res.data.data.FIELD16
 							this.goodsWeight = res.data.data.FIELD17
-							this.type = res.data.data.FIELD18
 							this.isNeedQueue = res.data.data.FIELD15
 							this.reservationInfo = true
 							this.reservationNo = res.data.data.RESERVATION_NO
@@ -439,11 +473,6 @@
 					return
 				}
 				window.location.href = 'http://xiaozhao.jttygroup.com/qywx/scan/?openid='+this.openid+'&transportCompany='+this.carList[this.carNO]+'&mobile='+this.mobile
-				// uni.redirectTo({
-				//     url: '/pages/scancode/scan?carNO='+this.carNO+'&businessStatus='+this.businessStatus+'&mobile='+this.mobile
-				// 	+'&transportCompany='+this.carList[this.carNO]+'&clientName='+this.clientName+'&goodsWeight='+this.goodsWeight
-				// 	+'&type='+this.type+'&place='+this.place
-				// });
 			},
 			showQRCode(){
 				this.$refs.qrcodeContainer.innerHTML = ''
