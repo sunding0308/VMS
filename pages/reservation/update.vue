@@ -72,6 +72,14 @@
 			<view class="title">是否排队</view>
 			<view class="text-black door">{{this.isNeedQueue == 1 ? '是' : '否'}}</view>
 		</view>
+		<view class="cu-form-group" v-show="ifNeedBoxNo">
+			<view class="title">集装箱号-1<span>*</span></view>
+			<input class="text-right" placeholder="请输入7位数箱号" name="input" v-model="boxNo1"></input>
+		</view>
+		<view class="cu-form-group" v-show="ifNeedBoxNo">
+			<view class="title">集装箱号-2<span>*</span></view>
+			<input class="text-right" placeholder="请输入7位数箱号" name="input" v-model="boxNo2"></input>
+		</view>
 		<view class="cu-form-group">
 			<view class="title">金田业务联系人号码</view>
 			<input class="text-right" placeholder="请输入" name="input" v-model="phone"></input>
@@ -116,6 +124,9 @@
 		<view class="cu-form-group" v-show="radio == 'YES'">
 			<view class="title">单位</view>
 			<input class="text-right" placeholder="请输入" name="input" v-model="unit3"></input>
+		</view>
+		<view class="cu-load load-modal" v-if="loadModal">
+			<view class="gray-text">处理中</view>
 		</view>
 		<view class="padding">
 			<button class="cu-btn block bg-blue margin-tb-sm lg bottom-space" type="" @click="submit">提交</button>
@@ -162,6 +173,7 @@
 				ifNeedGoodsWeight:false,
 				goodsWeight:'',
 				ifNeedReason:false,
+				ifNeedBoxNo:false,
 				reason:'',
 				ifNeedGoodsType:false,
 				checkbox: [{
@@ -175,6 +187,8 @@
 				door:'',
 				isNeedQueue:'',
 				phone:'',
+				boxNo1:'',
+				boxNo2:'',
 				radio:'NO',
 				goods1:'',
 				count1:'',
@@ -186,13 +200,17 @@
 				count3:'',
 				unit3:'',
 				userid:'',
-				username:''
+				username:'',
+				loadModal:false
 			}
 		},
 		computed:{
 			...mapState(['openid']),
 			datetime:function() {
 				return this.date + ' ' +this.time
+			},
+			boxNo:function() {
+				return this.boxNo1 + ',' + this.boxNo2;
 			}
 		},
 		methods: {
@@ -232,6 +250,13 @@
 							this.date = res.data.data.RESERVATION_ENTER_TIME.slice(0,10)
 							this.time = res.data.data.RESERVATION_ENTER_TIME.slice(11,17)
 							this.businessType = res.data.data.BUSINESS_TYPE
+							if (this.businessType == '集装箱原料送货') {
+								this.ifNeedBoxNo = true;
+								this.boxNo1 = res.data.data.FIELD21.slice(0,7);
+								this.boxNo2 = res.data.data.FIELD21.slice(8);
+							} else {
+								this.ifNeedBoxNo = false;
+							}
 							this.place = res.data.data.LOADING_LOCATION
 							this.clientName = res.data.data.FIELD16
 							this.goodsWeight = res.data.data.FIELD17
@@ -369,6 +394,14 @@
 					this.ifNeedGoodsWeight = false
 					this.clientName = ''
 					this.goodsWeight = ''
+				}
+				//如果是集装箱送货，显示箱号栏位 4:集装箱原料送货
+				if (e.detail.value == 4) {
+					this.ifNeedBoxNo = true
+				} else {
+					this.ifNeedBoxNo = false
+					this.boxNo1 = '';
+					this.boxNo2 = '';
 				}
 				//货物类型隐藏
 				this.ifNeedGoodsType = false
@@ -540,6 +573,23 @@
 					})
 					return false
 				}
+				if (this.businessType == '集装箱原料送货') {
+					if (this.boxNo1 == '' || this.boxNo2 == '') {
+						uni.showModal({
+							content: '请输入箱号',
+							showCancel: false
+						})
+						return false
+					}
+					if (this.boxNo1.length != 7 || this.boxNo2.length != 7) {
+						uni.showModal({
+							content: '请输入7位箱号',
+							showCancel: false
+						})
+						return false
+					}
+				}
+				this.loadModal = true;
 				let goodsList = []
 				let id = 0
 				if(this.goods1 != '') {
@@ -589,12 +639,15 @@
 						"CAR_LICENSE": this.car,
 						"FIELD15": this.isNeedQueue,
 						"UPDATE_ITEMS": goodsList,
-						"IS_TERMINAL": 0
+						"IS_TERMINAL": 0,
+						"FIELD20": 1, //预约厂区：集团
+						"FIELD21": this.boxNo
 					},
 					method:"POST",
 					header : {'content-type':'application/json'},
-					success: function (res) {
+					success: (res)=> {
 						if(res.data.code == '90001') {
+							this.loadModal = false;
 							uni.showModal({
 								content: res.data.message,
 								showCancel: false,
@@ -606,6 +659,7 @@
 							})
 						} else {
 							console.log(res.data);
+							this.loadModal = false;
 							uni.showModal({
 								content: res.data.message,
 								showCancel: false

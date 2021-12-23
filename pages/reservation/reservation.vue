@@ -80,8 +80,16 @@
 			<view class="title">是否排队</view>
 			<view class="text-black door">{{this.isNeedQueue == 1 ? '是' : '否'}}</view>
 		</view>
+		<view class="cu-form-group" v-show="ifNeedBoxNo">
+			<view class="title">集装箱号-1<span>*</span></view>
+			<input class="text-right" placeholder="请输入7位数箱号" name="input" v-model="boxNo1"></input>
+		</view>
+		<view class="cu-form-group" v-show="ifNeedBoxNo">
+			<view class="title">集装箱号-2<span>*</span></view>
+			<input class="text-right" placeholder="请输入7位数箱号" name="input" @focus="cleanBox2" @blur="setBox2" v-model="boxNo2"></input>
+		</view>
 		<view class="cu-form-group">
-			<view class="title">金田业务联系人号码</view>
+			<view class="title">金田业务联系人号码<span>*</span></view>
 			<input class="text-right" placeholder="请输入" name="input" v-model="phone"></input>
 		</view>
 		<view class="cu-form-group">
@@ -124,6 +132,9 @@
 		<view class="cu-form-group" v-show="radio == 'YES'">
 			<view class="title">单位</view>
 			<input class="text-right" placeholder="请输入" name="input" v-model="unit3"></input>
+		</view>
+		<view class="cu-load load-modal" v-if="loadModal">
+			<view class="gray-text">处理中</view>
 		</view>
 		<view class="padding">
 			<button class="cu-btn block bg-blue margin-tb-sm lg bottom-space" type="" @click="submit">提交</button>
@@ -168,6 +179,7 @@
 				ifNeedGoodsWeight:false,
 				goodsWeight:'',
 				ifNeedReason:false,
+				ifNeedBoxNo:false,
 				reason:'',
 				ifNeedGoodsType:false,
 				checkbox: [{
@@ -181,6 +193,8 @@
 				door:'-',
 				isNeedQueue:'',
 				phone:'',
+				boxNo1:'',
+				boxNo2:'*******',
 				radio:'NO',
 				goods1:'',
 				count1:'',
@@ -212,7 +226,8 @@
 						good:'电解铜3',
 						count:'7吨'
 					}
-				]
+				],
+				loadModal:false
 			}
 		},
 		mounted(){
@@ -235,6 +250,9 @@
 			place:function() {
 				return this.placeIndex == -1 ? '请选择' : this.placeRange[this.placeIndex]
 			},
+			boxNo:function() {
+				return this.boxNo1 + ',' + this.boxNo2;
+			}
 		},
 		methods: {
 			onLoad:function(options){
@@ -317,6 +335,14 @@
 			TimeChange(e) {
 				this.time = e.detail.value
 			},
+			cleanBox2(){
+				this.boxNo2 = '';
+			},
+			setBox2(){
+				if(this.boxNo2 == ""){
+					this.boxNo2 = '*******';
+				}
+			},
 			BusinessTypeChange(e) {
 				//控制客户名称、货物重量显示隐藏 3:成品提货
 				if (e.detail.value == 3) {
@@ -327,6 +353,14 @@
 					this.ifNeedGoodsWeight = false
 					this.clientName = ''
 					this.goodsWeight = ''
+				}
+				//如果是集装箱送货，显示箱号栏位 5:集装箱原料送货
+				if (e.detail.value == 5) {
+					this.ifNeedBoxNo = true
+				} else {
+					this.ifNeedBoxNo = false
+					this.boxNo1 = '';
+					this.boxNo2 = '';
 				}
 				//货物类型隐藏
 				this.ifNeedGoodsType = false
@@ -500,9 +534,16 @@
 					})
 					return false
 				}
+				if (this.phone == '') {
+					uni.showModal({
+						content: '请输入金田联系人号码',
+						showCancel: false
+					})
+					return false
+				}
 				if (this.radio == 'YES' && this.goods1 == '' && this.goods2 == '' && this.goods3 == '') {
 					uni.showModal({
-						content: '请输入随车入厂财务',
+						content: '请输入随车入厂财物',
 						showCancel: false
 					})
 					return false
@@ -514,6 +555,23 @@
 					})
 					return false
 				}
+				if (this.businessType == '集装箱原料送货') {
+					if (this.boxNo1 == '' || this.boxNo2 == '') {
+						uni.showModal({
+							content: '请输入箱号',
+							showCancel: false
+						})
+						return false
+					}
+					if (this.boxNo1.length != 7 || this.boxNo2.length != 7) {
+						uni.showModal({
+							content: '请输入7位箱号',
+							showCancel: false
+						})
+						return false
+					}
+				}
+				this.loadModal = true;
 				let goodsList = []
 				let id = 0
 				if(this.goods1 != '') {
@@ -562,12 +620,15 @@
 						"CAR_LICENSE": this.car,
 						"FIELD15": this.isNeedQueue,
 						"listZvms043Item": goodsList,
-						"IS_TERMINAL": 0
+						"IS_TERMINAL": 0,
+						"FIELD20": 1, //预约厂区：集团
+						"FIELD21": this.boxNo
 					},
 					method:"POST",
 					header : {'content-type':'application/json'},
-					success: function (res) {
+					success: (res)=> {
 						if(res.data.code == '90001') {
+							this.loadModal = false;
 							uni.showModal({
 								content: res.data.message,
 								showCancel: false,
@@ -579,6 +640,7 @@
 							})
 						} else {
 							console.log(res.data);
+							this.loadModal = false;
 							uni.showModal({
 								content: res.data.message,
 								showCancel: false

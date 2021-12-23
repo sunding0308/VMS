@@ -458,6 +458,14 @@
 					})
 					return
 				}
+				if(this.businessStatus == 10){
+					let business_status = 25
+					if (this.isNeedQueue == 1) {
+						business_status = 20
+					}
+					window.location.href = 'http://xiaozhao.jttygroup.com/qywx/scan/update_status.php?reservationNo='+this.reservationNo+'&businessStatus='+business_status
+					return
+				}
 				if(this.businessStatus != 30){
 					uni.showModal({
 						content: '预约信息状态不正确',
