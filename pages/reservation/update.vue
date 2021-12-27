@@ -210,7 +210,11 @@
 				return this.date + ' ' +this.time
 			},
 			boxNo:function() {
-				return this.boxNo1 + ',' + this.boxNo2;
+				if(this.boxNo1 != "" || this.boxNo2 != ""){
+					return this.boxNo1 + ',' + this.boxNo2;
+				}else{
+					return "";
+				}
 			}
 		},
 		methods: {

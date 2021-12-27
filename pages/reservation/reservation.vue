@@ -251,7 +251,11 @@
 				return this.placeIndex == -1 ? '请选择' : this.placeRange[this.placeIndex]
 			},
 			boxNo:function() {
-				return this.boxNo1 + ',' + this.boxNo2;
+				if(this.boxNo1 != "" || this.boxNo2 != ""){
+					return this.boxNo1 + ',' + this.boxNo2;
+				}else{
+					return "";
+				}
 			}
 		},
 		methods: {
